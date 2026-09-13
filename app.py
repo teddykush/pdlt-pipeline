@@ -11,7 +11,7 @@ search_term = st.text_input("Enter financial term or keyword (e.g., restructurin
 if search_term:
     query = text("""
         SELECT * FROM canonical_nse_records 
-        WHERE cast(desc as text) ILIKE :term 
+        WHERE cast("desc" as text) ILIKE :term 
            OR cast(subject as text) ILIKE :term
     """)
     try:
