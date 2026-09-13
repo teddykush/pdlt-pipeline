@@ -6,13 +6,20 @@ from sqlalchemy import create_engine
 def fetch_nse_live_data():
     scraper = cloudscraper.create_scraper()
     try:
-        # Establish session cookies
         scraper.get("https://www.nseindia.com", timeout=10)
         api_url = "https://www.nseindia.com/api/corporate-announcements?index=equities"
         response = scraper.get(api_url, timeout=10)
-
+        
         data = response.json()
-        records = data.get("data", [])
+        
+        # Handle cases where the endpoint returns a list directly or a dict containing 'data'
+        if isinstance(data, list):
+            records = data
+        elif isinstance(data, dict):
+            records = data.get("data", [])
+        else:
+            records = []
+            
         return pd.DataFrame(records)
     except Exception as e:
         print(f"NSE block or parsing error: {e}")
