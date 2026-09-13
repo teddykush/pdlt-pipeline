@@ -22,18 +22,35 @@ try:
     st.title("🚨 Forensic Public Disclosure Lag Time (PDLT) Pipeline")
     st.markdown("Live cloud monitoring environment synced with **Supabase PostgreSQL**.")
     
+    # Sidebar Controls & Filters
+    st.sidebar.header("🔍 Controls & Filters")
+    threshold = st.sidebar.slider("Anomaly Threshold (Hours)", min_value=100, max_value=2000, value=500, step=50)
+    
+    # Top KPI Metrics
     col1, col2, col3 = st.columns(3)
-    col1.metric("Canonical Records Ingested", len(df_canon))
-    col2.metric("Forensic Attachments Logged", len(df_forensic))
-    col3.metric("Anomaly Threshold", "> 500 Hours")
+    col1.metric("Canonical Records", len(df_canon))
+    col2.metric("Forensic Records", len(df_forensic))
+    col3.metric("Active Threshold", f"{threshold} Hrs")
     
     st.divider()
     
-    st.subheader("📋 Canonical NSE Records (Cloud Database)")
-    st.dataframe(df_canon.head(50), use_container_width=True)
+    # Visual Analytics Section
+    st.subheader("📊 Lag-Time Distribution Analytics")
+    if not df_forensic.empty and any(col in df_forensic.columns for col in ['lag_time_hours', 'lag_hours', 'delay_hours']):
+        # Automatically detect the lag column name
+        lag_col = next(col for col in ['lag_time_hours', 'lag_hours', 'delay_hours'] if col in df_forensic.columns)
+        st.bar_chart(df_forensic[lag_col])
+    else:
+        st.info("Forensic dataset loaded successfully. Reviewing raw metrics below.")
     
-    st.subheader("🔍 Attachment Forensics & Lag Analysis")
-    st.dataframe(df_forensic.head(50), use_container_width=True)
+    st.divider()
+    
+    # Data Tables
+    st.subheader("📋 Canonical NSE Records")
+    st.dataframe(df_canon.head(100), use_container_width=True)
+    
+    st.subheader("🔍 Attachment Forensics")
+    st.dataframe(df_forensic.head(100), use_container_width=True)
 
 except Exception as e:
-    st.error(f"Failed to connect to Supabase cloud database: {e}")
+    st.error(f"Dashboard runtime error: {e}")
