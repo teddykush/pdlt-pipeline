@@ -10,13 +10,16 @@ def get_engine():
 
 engine = get_engine()
 
-@st.cache_data
+# ---> UPDATE THIS SECTION <---
+@st.cache_data(ttl=600)  # Add (ttl=600) right here inside the decorator
 def load_data():
     df_canon = pd.read_sql("SELECT * FROM canonical_nse_records", engine)
     df_forensic = pd.read_sql("SELECT * FROM nse_attachment_forensics", engine)
     return df_canon, df_forensic
 
 try:
+    df_canon, df_forensic = load_data()
+    # ... rest of your dashboard code ...
     df_canon, df_forensic = load_data()
     
     st.title("🚨 Forensic Public Disclosure Lag Time (PDLT) Pipeline")
